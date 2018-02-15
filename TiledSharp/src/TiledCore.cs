@@ -23,9 +23,9 @@ namespace TiledSharp
             TmxDirectory = string.Empty;
         }
 
-        protected XDocument ReadXml(string filepath)
+        protected XDocument ReadXml(string filepath, IStreamProvider streamProvider)
         {
-            XDocument xDoc;
+            XDocument xDoc = null;
 
             var asm = Assembly.GetEntryAssembly();
             var manifest = new string[0];
@@ -48,7 +48,21 @@ namespace TiledSharp
                 }
                 TmxDirectory = String.Empty;
             }
-            else
+            else if (streamProvider != null)
+            {
+                using (Stream stream = streamProvider.GetStream(filepath))
+                {
+                    if (stream != null)
+                    {
+                        using (XmlReader reader = XmlReader.Create(stream))
+                        {
+                            xDoc = XDocument.Load(reader);
+                            TmxDirectory = string.Empty;
+                        }
+                    }
+                }
+            }
+            if (xDoc == null)
             {
                 // TODO: Check for existence of file
 

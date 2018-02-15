@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Xml.Linq;
 using System.Globalization;
 using System.IO;
+using System.Text;
 
 namespace TiledSharp
 {
@@ -32,20 +33,23 @@ namespace TiledSharp
 
         public TmxMap(string filename)
         {
-            Load(ReadXml(filename));
+            Load(ReadXml(filename, null), null);
         }
 
-        public TmxMap(Stream inputStream)
+        public TmxMap(Stream inputStream, IStreamProvider streamProvider = null)
         {
-            Load(XDocument.Load(inputStream));
+            using (StreamReader reader = new StreamReader(inputStream, Encoding.UTF8))
+            {
+                Load(XDocument.Load(reader), streamProvider);
+            }
         }
 
-        public TmxMap(XDocument xDoc)
+        public TmxMap(XDocument xDoc, IStreamProvider streamProvider = null)
         {
-            Load(xDoc);
+            Load(xDoc, streamProvider);
         }
          
-        private void Load(XDocument xDoc)
+        private void Load(XDocument xDoc, IStreamProvider streamProvider)
         {
             var xMap = xDoc.Element("map");
             Version = (string) xMap.Attribute("version");
@@ -108,7 +112,7 @@ namespace TiledSharp
 
             Tilesets = new TmxList<TmxTileset>();
             foreach (var e in xMap.Elements("tileset"))
-                Tilesets.Add(new TmxTileset(e, TmxDirectory));
+                Tilesets.Add(new TmxTileset(e, streamProvider, TmxDirectory));
 
             Layers = new TmxList<TmxLayer>();
             foreach (var e in xMap.Elements("layer"))

@@ -30,11 +30,11 @@ namespace TiledSharp
         public TmxList<TmxTerrain> Terrains {get; private set;}
 
         // TSX file constructor
-        public TmxTileset(XContainer xDoc, string tmxDir) :
-            this(xDoc.Element("tileset"), tmxDir) { }
+        public TmxTileset(XContainer xDoc, IStreamProvider streamProvider, string tmxDir) :
+            this(xDoc.Element("tileset"), streamProvider, tmxDir) { }
 
         // TMX tileset element constructor
-        public TmxTileset(XElement xTileset, string tmxDir = "")
+        public TmxTileset(XElement xTileset, IStreamProvider streamProvider, string tmxDir = "")
         {
             var xFirstGid = xTileset.Attribute("firstgid");
             var source = (string) xTileset.Attribute("source");
@@ -48,8 +48,8 @@ namespace TiledSharp
                 FirstGid = (int) xFirstGid;
 
                 // Everything else is in the TSX file
-                var xDocTileset = ReadXml(source);
-                var ts = new TmxTileset(xDocTileset, TmxDirectory);
+                var xDocTileset = ReadXml(source, streamProvider);
+                var ts = new TmxTileset(xDocTileset, streamProvider, TmxDirectory);
                 Name = ts.Name;
                 TileWidth = ts.TileWidth;
                 TileHeight = ts.TileHeight;
